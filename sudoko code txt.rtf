@@ -1,0 +1,607 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2580
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;\f1\fnil\fcharset0 AppleColorEmoji;\f2\fswiss\fcharset0 Helvetica;
+\f3\fnil\fcharset0 Menlo-Bold;}
+{\colortbl;\red255\green255\blue255;\red108\green121\blue134;\red31\green31\blue36;\red255\green255\blue255;
+\red253\green143\blue63;\red252\green106\blue93;\red108\green121\blue134;\red252\green95\blue163;\red208\green191\blue105;
+\red93\green216\blue255;\red208\green168\blue255;\red65\green161\blue192;\red161\green103\blue230;\red253\green143\blue63;
+\red103\green183\blue164;\red158\green241\blue221;\red103\green183\blue164;}
+{\*\expandedcolortbl;;\csgenericrgb\c42394\c47462\c52518;\csgenericrgb\c12054\c12284\c14131;\csgenericrgb\c100000\c100000\c100000\c85000;
+\csgenericrgb\c99131\c56076\c24611;\csgenericrgb\c98912\c41558\c36568;\csgenericrgb\c42394\c47462\c52518\c45000;\csgenericrgb\c98839\c37355\c63833;\csgenericrgb\c81498\c74939\c41233;
+\csgenericrgb\c36295\c84643\c99897;\csgenericrgb\c81681\c65692\c99927;\csgenericrgb\c25490\c63137\c75294;\csgenericrgb\c63137\c40392\c90196;\csgenericrgb\c99216\c56078\c24706;
+\csgenericrgb\c40538\c71705\c64209;\csgenericrgb\c62145\c94386\c86819;\csgenericrgb\c40392\c71765\c64314;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab692
+\pard\tx692\pardeftab692\pardirnatural\partightenfactor0
+
+\f0\fs28 \cf2 \cb3 //\cf4 \
+\cf2 //  main.c\cf4 \
+\cf2 //  Sudoko\cf4 \
+\cf2 //\cf4 \
+\cf2 //  Created by Zain 
+\f1 \uc0\u55357 \u56443 
+\f0  on 07/10/2021.\cf4 \
+\cf2 //\cf4 \
+\
+\cf5 #include \cf6 <pthread.h>\cf4 \
+\cf5 #include \cf6 <stdio.h>\cf4 \
+\cf5 #include \cf6 <stdlib.h>\cf4 \
+\
+\cf7 ///
+\f2 \cf2 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ////////////////////////////                         G   A   M    E              B   O   R   D                               //////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\
+
+\f3\b \cf8 int
+\f0\b0 \cf4  GameBoard[\cf9 9\cf4 ][\cf9 9\cf4 ]; \cf2 //-------->Board from file\cf4 \
+
+\f3\b \cf8 int
+\f0\b0 \cf4  Validation[\cf9 11\cf4 ];  \cf2 //--------->For Validation\cf4 \
+
+\f3\b \cf8 int
+\f0\b0 \cf4  GridCheck = \cf9 2\cf4 ; \cf2 //------>3x3 selection\cf4 \
+\
+\cf7 ///
+\f2 \cf2 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ////////////////////////////                                      S   T   R   U   C   T                                           //////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+
+\f3\b \cf8 typedef
+\f0\b0 \cf4  
+\f3\b \cf8 struct
+\f0\b0 \cf4 \
+\{\
+    \cf2 //struct to store info of thread\cf4 \
+    
+\f3\b \cf8 int
+\f0\b0 \cf4  row;\
+    
+\f3\b \cf8 int
+\f0\b0 \cf4  column;\
+    \
+\}\cf10 forCheck\cf4 ;\
+\cf7 ///
+\f2 \cf2 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ////////////////////////////                            T H R E A D       D E C L E R A T I O N                     //////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\
+\cf11 pthread_t\cf4  COL;\cf2 //---------> Coloumn thread\cf4 \
+\cf11 pthread_t\cf4  ROW;\cf2 //---------> Row     thread\cf4 \
+\cf11 pthread_t\cf4  thread_1, thread_2, thread_3, thread_4, thread_5, thread_6, thread_7, thread_8, thread_9;\
+\cf7 ///
+\f2 \cf2 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ////////////////////////////                       F U N C T I O N       P R O T O T Y P E S                     //////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf2 /* Declare the thread that checks columns, rows and 3x3 subgrids */\cf4 \
+
+\f3\b \cf8 void
+\f0\b0 \cf4  *\cf12 colCheck\cf4 (
+\f3\b \cf8 void
+\f0\b0 \cf4  *Input);\
+
+\f3\b \cf8 void
+\f0\b0 \cf4  *\cf12 rowCheck\cf4 (
+\f3\b \cf8 void
+\f0\b0 \cf4  *Input);\
+
+\f3\b \cf8 void
+\f0\b0 \cf4  *\cf12 squareCheck\cf4 (
+\f3\b \cf8 void
+\f0\b0 \cf4  *Input);\
+\
+\cf7 ///
+\f2 \cf2 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ////////////////////////////                                 M A I N           F U N C T I O N                             //////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+
+\f3\b \cf8 int
+\f0\b0 \cf4  \cf12 main\cf4 (
+\f3\b \cf8 int
+\f0\b0 \cf4  argc, 
+\f3\b \cf8 char
+\f0\b0 \cf4  *argv[])\
+\{\
+\
+    
+\f3\b \cf8 int
+\f0\b0 \cf4  validator = \cf9 0\cf4 ; \cf2 //-------------->used for validation\cf4 \
+        \
+    
+\f3\b \cf8 if
+\f0\b0 \cf4  (argc == \cf9 1\cf4 )\
+    \{\
+            \cf13 fprintf\cf4 (\cf14 stderr\cf4 ,\cf6 "Usage: ./hw2 <sudoku grid>\\n"\cf4 );\
+\
+            
+\f3\b \cf8 return
+\f0\b0 \cf4  -\cf9 1\cf4 ;\cf2 //IF error\cf4 \
+        \}\
+\cf7 ///
+\f2 \cf2 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ////////////////////////////                                 R E A D I N G       F I L E                                      //////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+    \
+    \cf11 FILE\cf4  *sudoku;\
+    sudoku = \cf13 fopen\cf4 (argv[\cf9 1\cf4 ], \cf6 "r"\cf4 );\
+\
+    
+\f3\b \cf8 for
+\f0\b0 \cf4 (
+\f3\b \cf8 int
+\f0\b0 \cf4  i = \cf9 0\cf4 ; i < \cf9 9\cf4 ; i++)\
+    \{\
+        
+\f3\b \cf8 for
+\f0\b0 \cf4 (
+\f3\b \cf8 int
+\f0\b0 \cf4  j = \cf9 0\cf4 ; j < \cf9 9\cf4 ; j++)\
+        \{\
+            \cf13 fscanf\cf4 (sudoku, \cf6 "%d "\cf4 , &\cf15 GameBoard\cf4 [i][j]);\
+        \}\
+    \}\
+            \
+\cf7 ///
+\f2 \cf2 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ////////////////////////////           V A L U E S       T O      S T R U C T      V A R I A B L E S          //////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+  \
+        \cf16 forCheck\cf4  *checkRows = (\cf16 forCheck\cf4  *) \cf13 malloc\cf4 (
+\f3\b \cf8 sizeof
+\f0\b0 \cf4 (\cf16 forCheck\cf4 ));\
+        checkRows->\cf15 row\cf4  = \cf9 0\cf4 ;\
+        checkRows->\cf15 column\cf4  = \cf9 0\cf4 ;\
+       \
+        \cf16 forCheck\cf4  *checkCols = (\cf16 forCheck\cf4  *) \cf13 malloc\cf4 (
+\f3\b \cf8 sizeof
+\f0\b0 \cf4 (\cf16 forCheck\cf4 ));\
+        checkCols->\cf15 row\cf4  = \cf9 0\cf4 ;\
+        checkCols->\cf15 column\cf4  = \cf9 0\cf4 ;\
+       \
+        \cf16 forCheck\cf4  *one3x3 = (\cf16 forCheck\cf4  *) \cf13 malloc\cf4 (
+\f3\b \cf8 sizeof
+\f0\b0 \cf4 (\cf16 forCheck\cf4 ));\
+        one3x3->\cf15 row\cf4  = \cf9 0\cf4 ;\
+        one3x3->\cf15 column\cf4  = \cf9 0\cf4 ;\
+        \
+        \cf16 forCheck\cf4  *two3x3 = (\cf16 forCheck\cf4  *) \cf13 malloc\cf4 (
+\f3\b \cf8 sizeof
+\f0\b0 \cf4 (\cf16 forCheck\cf4 ));\
+        two3x3->\cf15 row\cf4  = \cf9 0\cf4 ;\
+        two3x3->\cf15 column\cf4  = \cf9 3\cf4 ;\
+     \
+        \cf16 forCheck\cf4  *three3x3 = (\cf16 forCheck\cf4  *) \cf13 malloc\cf4 (
+\f3\b \cf8 sizeof
+\f0\b0 \cf4 (\cf16 forCheck\cf4 ));\
+        three3x3->\cf15 row\cf4  = \cf9 0\cf4 ;\
+        three3x3->\cf15 column\cf4  = \cf9 6\cf4 ;\
+      \
+        \cf16 forCheck\cf4  *four3x3 = (\cf16 forCheck\cf4  *) \cf13 malloc\cf4 (
+\f3\b \cf8 sizeof
+\f0\b0 \cf4 (\cf16 forCheck\cf4 ));\
+        four3x3->\cf15 row\cf4  = \cf9 3\cf4 ;\
+        four3x3->\cf15 column\cf4  = \cf9 0\cf4 ;\
+       \
+        \cf16 forCheck\cf4  *five3x3 = (\cf16 forCheck\cf4  *) \cf13 malloc\cf4 (
+\f3\b \cf8 sizeof
+\f0\b0 \cf4 (\cf16 forCheck\cf4 ));\
+        five3x3->\cf15 row\cf4  = \cf9 3\cf4 ;\
+        five3x3->\cf15 column\cf4  = \cf9 3\cf4 ;\
+       \
+        \cf16 forCheck\cf4  *six3x3 = (\cf16 forCheck\cf4  *) \cf13 malloc\cf4 (
+\f3\b \cf8 sizeof
+\f0\b0 \cf4 (\cf16 forCheck\cf4 ));\
+        six3x3->\cf15 row\cf4  = \cf9 3\cf4 ;\
+        six3x3->\cf15 column\cf4  = \cf9 6\cf4 ;\
+       \
+        \cf16 forCheck\cf4  *seven3x3 = (\cf16 forCheck\cf4  *) \cf13 malloc\cf4 (
+\f3\b \cf8 sizeof
+\f0\b0 \cf4 (\cf16 forCheck\cf4 ));\
+        seven3x3->\cf15 row\cf4  = \cf9 6\cf4 ;\
+        seven3x3->\cf15 column\cf4  = \cf9 0\cf4 ;\
+    \
+        \cf16 forCheck\cf4  *eight3x3 = (\cf16 forCheck\cf4  *) \cf13 malloc\cf4 (
+\f3\b \cf8 sizeof
+\f0\b0 \cf4 (\cf16 forCheck\cf4 ));\
+        eight3x3->\cf15 row\cf4  = \cf9 6\cf4 ;\
+        eight3x3->\cf15 column\cf4  = \cf9 3\cf4 ;\
+      \
+        \cf16 forCheck\cf4  *nine3x3 = (\cf16 forCheck\cf4  *) \cf13 malloc\cf4 (
+\f3\b \cf8 sizeof
+\f0\b0 \cf4 (\cf16 forCheck\cf4 ));\
+        nine3x3->\cf15 row\cf4  = \cf9 6\cf4 ;\
+        nine3x3->\cf15 column\cf4  = \cf9 6\cf4 ;\
+        \
+\cf7 ///
+\f2 \cf2 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ////////////////////////////            V A L U E S    TO  BE    U S E D   IN      PTHREAD  JOIN      //////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+        \cf2 //return values? this is used for pthread join\cf4 \
+        
+\f3\b \cf8 void
+\f0\b0 \cf4  * rows;\
+        
+\f3\b \cf8 void
+\f0\b0 \cf4  * cols;\
+        
+\f3\b \cf8 void
+\f0\b0 \cf4  * one;\
+        
+\f3\b \cf8 void
+\f0\b0 \cf4  * two;\
+        
+\f3\b \cf8 void
+\f0\b0 \cf4  * three;\
+        
+\f3\b \cf8 void
+\f0\b0 \cf4  * four;\
+        
+\f3\b \cf8 void
+\f0\b0 \cf4  * five;\
+        
+\f3\b \cf8 void
+\f0\b0 \cf4  * six;\
+        
+\f3\b \cf8 void
+\f0\b0 \cf4  * seven;\
+        
+\f3\b \cf8 void
+\f0\b0 \cf4  * eight;\
+        
+\f3\b \cf8 void
+\f0\b0 \cf4  * nine;\
+        \
+\cf7 ///
+\f2 \cf2 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ////////////////////////////                                 C R E A T I N G         T H R E A D S                    //////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+        \cf13 pthread_create\cf4 (&\cf15 COL\cf4 , 
+\f3\b \cf8 NULL
+\f0\b0 \cf4 , \cf17 colCheck\cf4 , (
+\f3\b \cf8 void
+\f0\b0 \cf4  *) checkCols);\
+        \cf13 pthread_create\cf4 (&\cf15 ROW\cf4 , 
+\f3\b \cf8 NULL
+\f0\b0 \cf4 , \cf17 rowCheck\cf4 , (
+\f3\b \cf8 void
+\f0\b0 \cf4  *) checkRows);\
+        \cf13 pthread_create\cf4 (&\cf15 thread_1\cf4 , 
+\f3\b \cf8 NULL
+\f0\b0 \cf4 , \cf17 squareCheck\cf4 , (
+\f3\b \cf8 void
+\f0\b0 \cf4  *) one3x3);\
+        \cf13 pthread_create\cf4 (&\cf15 thread_2\cf4 , 
+\f3\b \cf8 NULL
+\f0\b0 \cf4 , \cf17 squareCheck\cf4 , (
+\f3\b \cf8 void
+\f0\b0 \cf4  *) two3x3);\
+        \cf13 pthread_create\cf4 (&\cf15 thread_3\cf4 , 
+\f3\b \cf8 NULL
+\f0\b0 \cf4 , \cf17 squareCheck\cf4 , (
+\f3\b \cf8 void
+\f0\b0 \cf4  *) three3x3);\
+        \cf13 pthread_create\cf4 (&\cf15 thread_4\cf4 , 
+\f3\b \cf8 NULL
+\f0\b0 \cf4 , \cf17 squareCheck\cf4 , (
+\f3\b \cf8 void
+\f0\b0 \cf4  *) four3x3);\
+        \cf13 pthread_create\cf4 (&\cf15 thread_5\cf4 , 
+\f3\b \cf8 NULL
+\f0\b0 \cf4 , \cf17 squareCheck\cf4 , (
+\f3\b \cf8 void
+\f0\b0 \cf4  *) five3x3);\
+        \cf13 pthread_create\cf4 (&\cf15 thread_6\cf4 , 
+\f3\b \cf8 NULL
+\f0\b0 \cf4 , \cf17 squareCheck\cf4 , (
+\f3\b \cf8 void
+\f0\b0 \cf4  *) six3x3);\
+        \cf13 pthread_create\cf4 (&\cf15 thread_7\cf4 , 
+\f3\b \cf8 NULL
+\f0\b0 \cf4 , \cf17 squareCheck\cf4 , (
+\f3\b \cf8 void
+\f0\b0 \cf4  *) seven3x3);\
+        \cf13 pthread_create\cf4 (&\cf15 thread_8\cf4 , 
+\f3\b \cf8 NULL
+\f0\b0 \cf4 , \cf17 squareCheck\cf4 , (
+\f3\b \cf8 void
+\f0\b0 \cf4  *) eight3x3);\
+        \cf13 pthread_create\cf4 (&\cf15 thread_9\cf4 , 
+\f3\b \cf8 NULL
+\f0\b0 \cf4 , \cf17 squareCheck\cf4 , (
+\f3\b \cf8 void
+\f0\b0 \cf4  *) nine3x3);\
+     \
+\cf7 ///
+\f2 \cf2 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ////////////////////////////                                 W A I T I N G       T H R E A D S                          //////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+        \cf13 pthread_join\cf4 (\cf15 COL\cf4 , &cols);\
+        \cf13 pthread_join\cf4 (\cf15 ROW\cf4 , &rows);\
+        \cf13 pthread_join\cf4 (\cf15 thread_1\cf4 , &one);\
+        \cf13 pthread_join\cf4 (\cf15 thread_2\cf4 , &two);\
+        \cf13 pthread_join\cf4 (\cf15 thread_3\cf4 , &three);\
+        \cf13 pthread_join\cf4 (\cf15 thread_4\cf4 , &four);\
+        \cf13 pthread_join\cf4 (\cf15 thread_5\cf4 , &five);\
+        \cf13 pthread_join\cf4 (\cf15 thread_6\cf4 , &six);\
+        \cf13 pthread_join\cf4 (\cf15 thread_7\cf4 , &seven);\
+        \cf13 pthread_join\cf4 (\cf15 thread_8\cf4 , &eight);\
+        \cf13 pthread_join\cf4 (\cf15 thread_9\cf4 , &nine);\
+        \
+    \
+        \cf2 /* Finally, after all children returns, you can check the status array that is visible to everyone and see if it is valid. You then print out the final checking result*/\cf4 \
+    
+\f3\b \cf8 while
+\f0\b0 \cf4 (validator < \cf9 11\cf4 )\
+    \{\
+\
+            \
+            
+\f3\b \cf8 if
+\f0\b0 \cf4 (\cf15 Validation\cf4 [validator] == \cf9 1\cf4 )\{\
+        validator++;\
+            \}\
+            
+\f3\b \cf8 else
+\f0\b0 \cf4 \
+            \{\
+                \cf13 printf\cf4 (\cf6 "The Sudoku Puzzle is NOT solved. \\n"\cf4 );\
+                \cf13 exit\cf4 (\cf9 0\cf4 );\
+            \}\
+            \
+        \}\
+        \cf13 printf\cf4 (\cf6 "The Sudoku Puzzle is solved. \\n"\cf4 );\
+    \
+\
+    
+\f3\b \cf8 return
+\f0\b0 \cf4  \cf9 0\cf4 ;\
+\}\
+\
+\
+\cf2 /*thread code for child checking all columns*/\cf4 \
+
+\f3\b \cf8 void
+\f0\b0 \cf4  *\cf12 colCheck\cf4 (
+\f3\b \cf8 void
+\f0\b0 \cf4  *params)\
+\{\
+    
+\f3\b \cf8 int
+\f0\b0 \cf4  i, j;\
+    \
+    \cf16 forCheck\cf4  * c_worker = (\cf16 forCheck\cf4  *) params;\
+    
+\f3\b \cf8 int
+\f0\b0 \cf4  beginCol = c_worker->\cf15 column\cf4 ;\
+    
+\f3\b \cf8 int
+\f0\b0 \cf4  beginRow = c_worker->\cf15 row\cf4 ;\
+\
+    \cf2 /*sorting sudoku column; this will put the column into a sorted order and check for duplicates\cf4 \
+\cf2       if there are duplicates, this section is not valid and returns 0 for the column_worker;*/\cf4 \
+    \
+    
+\f3\b \cf8 for
+\f0\b0 \cf4 (i = beginCol; i < \cf9 9\cf4 ; i++)\{\
+     \
+    
+\f3\b \cf8 int
+\f0\b0 \cf4  col[\cf9 9\cf4 ]= \{\cf9 0\cf4 \}; \cf2 //array to hold sorted column\cf4 \
+        \
+        
+\f3\b \cf8 for
+\f0\b0 \cf4 (j = beginRow; j < \cf9 9\cf4 ; j++)\{\
+            \
+            
+\f3\b \cf8 int
+\f0\b0 \cf4  val = \cf15 GameBoard\cf4 [i][j]; \cf2 //this specific value in the column\cf4 \
+            \
+            \cf2 /*if the coresponding array element for the value is 0, it has not been seen and\cf4 \
+\cf2         we will input this value to the sorted column array. */\cf4 \
+            \
+        
+\f3\b \cf8 if
+\f0\b0 \cf4 (col[val-\cf9 1\cf4 ] == \cf9 0\cf4  && val > \cf9 0\cf4 )\{\
+               col[val-\cf9 1\cf4 ] = val;\
+        \
+            \}\
+        \cf2 /*if the value is not 0, then the value is a duplicate and the sudoku puzzle\cf4 \
+\cf2           is not solved or valid so the value of column_worker in valid is 0; */\cf4 \
+            
+\f3\b \cf8 else
+\f0\b0 \cf4 \{\
+        \cf15 Validation\cf4 [\cf9 0\cf4 ] = \cf9 0\cf4 ;\
+                \cf13 pthread_exit\cf4 (\cf9 0\cf4 );\
+            \}\
+        \}\
+    \}\
+    \cf15 Validation\cf4 [\cf9 0\cf4 ] = \cf9 1\cf4 ;\
+    \cf13 pthread_exit\cf4 (\cf9 0\cf4 );\
+\}\
+\
+\cf7 ///
+\f2 \cf2 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ////////////////////////////                C H I L D             C H E C K           R O W S                        //////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+
+\f3\b \cf8 void
+\f0\b0 \cf4  *\cf12 rowCheck\cf4 (
+\f3\b \cf8 void
+\f0\b0 \cf4  *INPUT)\
+\{\
+\
+    \
+    \cf16 forCheck\cf4  * ptrCheck = (\cf16 forCheck\cf4  *) INPUT;\
+    
+\f3\b \cf8 int
+\f0\b0 \cf4  startC = ptrCheck->\cf15 column\cf4 ;\cf2 //--------------->start coloumn\cf4 \
+    
+\f3\b \cf8 int
+\f0\b0 \cf4  startR = ptrCheck->\cf15 row\cf4 ;\cf2 //--------------->start rows\cf4 \
+    \
+\cf7 ///
+\f2 \cf2 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ////////////////////////////                                 S O R T I N G    R O W S                                    //////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+    \
+    
+\f3\b \cf8 for
+\f0\b0 \cf4 (
+\f3\b \cf8 int
+\f0\b0 \cf4  i = startC; i < \cf9 9\cf4 ; i++)\
+    \{\
+        \
+        
+\f3\b \cf8 int
+\f0\b0 \cf4  row[\cf9 9\cf4 ]= \{\cf9 0\cf4 \};\cf2 //------------------>SORTEED ROW\cf4 \
+        
+\f3\b \cf8 for
+\f0\b0 \cf4 (
+\f3\b \cf8 int
+\f0\b0 \cf4  j = startR; j < \cf9 9\cf4 ; j++)\{\
+            \
+            
+\f3\b \cf8 int
+\f0\b0 \cf4  val = \cf15 GameBoard\cf4 [i][j];\
+            
+\f3\b \cf8 if
+\f0\b0 \cf4 (row[val-\cf9 1\cf4 ] == \cf9 0\cf4  && val > \cf9 0\cf4 )\cf2 //------------> IF ZERO PUT FROM ROW\cf4 \
+            \{\
+                row[val-\cf9 1\cf4 ] = val;\
+            \}\
+            
+\f3\b \cf8 else
+\f0\b0 \cf4 \
+            \{\
+                \cf15 Validation\cf4 [\cf9 1\cf4 ] = \cf9 0\cf4 ;\
+                \cf13 pthread_exit\cf4 (\cf9 0\cf4 );\
+            \}\
+        \}\
+    \}\
+    \cf15 Validation\cf4 [\cf9 1\cf4 ] = \cf9 1\cf4 ;\
+    \cf13 pthread_exit\cf4 (\cf9 0\cf4 );\
+\}\
+\
+\cf7 ///
+\f2 \cf2 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ////////////////////////////         C H I L D             C H E C K     3X3       S U B G R I D S            //////////////////////////////////
+\f0 \cf4 \
+\cf7 ///
+\f2 \cf2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\f0 \cf4 \
+
+\f3\b \cf8 void
+\f0\b0 \cf4  *\cf12 squareCheck\cf4 (
+\f3\b \cf8 void
+\f0\b0 \cf4  *INPUT)\
+\{\
+    \cf16 forCheck\cf4  * worker = (\cf16 forCheck\cf4  *) INPUT;\
+    
+\f3\b \cf8 int
+\f0\b0 \cf4  startR = worker->\cf15 row\cf4 ;\
+    
+\f3\b \cf8 int
+\f0\b0 \cf4  startC = worker->\cf15 column\cf4 ;\
+    \
+    \
+    
+\f3\b \cf8 int
+\f0\b0 \cf4  square[\cf9 9\cf4 ] = \{\cf9 0\cf4 \}; \cf2 //----------->3X3 in 1D array\cf4 \
+\
+    
+\f3\b \cf8 for
+\f0\b0 \cf4  (
+\f3\b \cf8 int
+\f0\b0 \cf4  i = startR; i < startR + \cf9 3\cf4 ; ++i)\
+    \{\
+        
+\f3\b \cf8 for
+\f0\b0 \cf4  (
+\f3\b \cf8 int
+\f0\b0 \cf4  j = startC; j < startC + \cf9 3\cf4 ; ++j)\
+        \{\
+            
+\f3\b \cf8 int
+\f0\b0 \cf4  temp = \cf15 GameBoard\cf4 [i][j];\
+            
+\f3\b \cf8 if
+\f0\b0 \cf4  (square[temp-\cf9 1\cf4 ] == \cf9 0\cf4  && temp > \cf9 0\cf4 )\
+            \{\
+                square[temp-\cf9 1\cf4 ] = temp;\
+            \}\
+            
+\f3\b \cf8 else
+\f0\b0 \cf4 \
+            \{\
+                \cf15 Validation\cf4 [\cf15 GridCheck\cf4 ] = \cf9 0\cf4 ;\
+                \cf15 GridCheck\cf4 ++;\
+                \cf13 pthread_exit\cf4 (\cf9 0\cf4 );\
+            \}\
+        \}\
+    \}\
+    \cf15 Validation\cf4 [\cf15 GridCheck\cf4 ] = \cf9 1\cf4 ;\
+    \cf15 GridCheck\cf4 ++;\
+    \cf13 pthread_exit\cf4 (\cf9 0\cf4 );\
+\}\
+}
